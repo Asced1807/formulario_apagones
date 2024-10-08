@@ -507,17 +507,18 @@
     </form>   
 
 <script>
-function toggleOtherAction(checkboxId, inputId) {
-    var checkbox = document.getElementById(checkboxId);
-    var textInput = document.getElementById(inputId);
-    textInput.style.display = checkbox.checked ? 'inline' : 'none';
-    if (checkbox.checked) {
+document.addEventListener('DOMContentLoaded', function() {
+    function toggleOtherAction(checkboxId, inputId) {
+      var checkbox = document.getElementById(checkboxId);
+      var textInput = document.getElementById(inputId);
+      textInput.style.display = checkbox.checked ? 'inline' : 'none';
+      if (checkbox.checked) {
         textInput.required = true;
-    } else {
+      } else {
         textInput.required = false;
         textInput.value = '';
+      }
     }
-}
 
 document.querySelector('form').onsubmit = function(e) {
     var otherCheckboxes = document.querySelectorAll('input[type="checkbox"][id$="_checkbox"], #otroCheckbox, #otroCheckbox1');
