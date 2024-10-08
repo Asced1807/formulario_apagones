@@ -1,2 +1,7 @@
-DATABASE = "postgresql+psycopg2://postgres:elvin123@db:5432/formulario_apagones"
+# clave.py
+
+import os
+
+DATABASE = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:DDGbJwlwTxIfkogqoLakllnwAkmKyMgp@postgres-olkg.railway.internal:5432/ferrocarril?sslmode=require")
+
 
