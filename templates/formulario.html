@@ -507,84 +507,96 @@
     </form>   
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    function toggleOtherAction(checkboxId, inputId) {
-      var checkbox = document.getElementById(checkboxId);
-      var textInput = document.getElementById(inputId);
-      textInput.style.display = checkbox.checked ? 'inline' : 'none';
-      if (checkbox.checked) {
+// Función para manejar los campos "Otro"
+function toggleOtherAction(checkboxId, inputId) {
+    var checkbox = document.getElementById(checkboxId);
+    var textInput = document.getElementById(inputId);
+    textInput.style.display = checkbox.checked ? 'inline' : 'none';
+    if (checkbox.checked) {
         textInput.required = true;
-      } else {
+    } else {
         textInput.required = false;
         textInput.value = '';
-      }
+    }
+}
+
+// Esperar a que el DOM esté completamente cargado
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formularioEncuesta');
+    if (!form) {
+        console.error('No se encontró el formulario');
+        return;
     }
 
-document.querySelector('form').onsubmit = function(e) {
-    var otherCheckboxes = document.querySelectorAll('input[type="checkbox"][id$="_checkbox"], #otroCheckbox, #otroCheckbox1');
-    otherCheckboxes.forEach(function(checkbox) {
-        var inputId = checkbox.id.replace('Checkbox', 'Accion').replace('_checkbox', '_input');
-        var textInput = document.getElementById(inputId);
-        if (checkbox.checked && textInput.value.trim() !== '') {
-            checkbox.disabled = true;  // Deshabilita el checkbox
-        } else if (!checkbox.checked) {
-            textInput.disabled = true;  // Deshabilita el input de texto si no está marcado
-        }
-    });
-};
-
-    document.getElementById('formularioEncuesta').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Crear objeto con los datos del formulario
-    const formData = new FormData(this);
-    const datos = {};
-    
-    // Convertir FormData a objeto
-    formData.forEach((value, key) => {
-        // Manejo especial para checkboxes o campos múltiples
-        if (key.endsWith('[]')) {
-            const cleanKey = key.slice(0, -2);
-            if (!datos[cleanKey]) {
-                datos[cleanKey] = [];
-            }
-            datos[cleanKey].push(value);
-        } else {
-            if (datos[key]) {
-                if (!Array.isArray(datos[key])) {
-                    datos[key] = [datos[key]];
+    // Manejar la deshabilitación de checkboxes y campos de texto
+    form.onsubmit = function(e) {
+        var otherCheckboxes = document.querySelectorAll('input[type="checkbox"][id$="_checkbox"], #otroCheckbox, #otroCheckbox1');
+        otherCheckboxes.forEach(function(checkbox) {
+            var inputId = checkbox.id.replace('Checkbox', 'Accion').replace('_checkbox', '_input');
+            var textInput = document.getElementById(inputId);
+            if (textInput) { // Verificar que el elemento existe
+                if (checkbox.checked && textInput.value.trim() !== '') {
+                    checkbox.disabled = true;
+                } else if (!checkbox.checked) {
+                    textInput.disabled = true;
                 }
-                datos[key].push(value);
-            } else {
-                datos[key] = value;
             }
-        }
-    });
+        });
+    };
 
-    try {
-        const response = await fetch('https://formularioapagones-production.up.railway.app/enviar/?local_kw=valor', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(datos)
+    // Manejar el envío del formulario
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Crear objeto con los datos del formulario
+        const formData = new FormData(this);
+        const datos = {};
+        
+        // Convertir FormData a objeto
+        formData.forEach((value, key) => {
+            if (key.endsWith('[]')) {
+                const cleanKey = key.slice(0, -2);
+                if (!datos[cleanKey]) {
+                    datos[cleanKey] = [];
+                }
+                datos[cleanKey].push(value);
+            } else {
+                if (datos[key]) {
+                    if (!Array.isArray(datos[key])) {
+                        datos[key] = [datos[key]];
+                    }
+                    datos[key].push(value);
+                } else {
+                    datos[key] = value;
+                }
+            }
         });
 
-        if (!response.ok) {
-            throw await response.json();
+        try {
+            const response = await fetch('https://formularioapagones-production.up.railway.app/enviar/?local_kw=valor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(datos)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error en el servidor');
+            }
+
+            const result = await response.json();
+            console.log('Respuesta exitosa:', result);
+            
+            // Redirigir a la página de confirmación
+            window.location.href = "/validacion";
+        } catch (error) {
+            console.error('Error al enviar los datos:', error);
+            alert('Error al enviar los datos: ' + error.message);
         }
-
-        const result = await response.json();
-        console.log(result);
-        
-        // Redirigir a la página de confirmación
-        window.location.href = "/validacion";
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al enviar los datos');
-    }
+    });
 });
-
 </script>
 </body>
 </html>
