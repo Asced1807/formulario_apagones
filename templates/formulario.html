@@ -561,7 +561,8 @@ document.querySelector('form').onsubmit = function(e) {
     });
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/enviar/?local_kw=valor', {
+        const response = await fetch('https://formularioapagones-production.up.railway.app/enviar/?local_kw=valor
+', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
